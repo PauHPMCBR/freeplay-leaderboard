@@ -1,0 +1,148 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply box-border m-0 p-0;
+  }
+  body {
+    @apply min-h-screen flex flex-col;
+    font-family: 'Roboto', sans-serif;
+    background: linear-gradient(135deg, #f0f4f8, #d9e2ec);
+  }
+  select, textarea {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-md text-base transition-all;
+    &:focus {
+      @apply border-blue-600 outline-none ring-1 ring-blue-600;
+    }
+  }
+
+  /* Specific number input styling */
+  input[type="number"] {
+    @apply appearance-none; /* Remove spinner arrows */
+  }
+  fieldset {
+    @apply border-2 border-gray-200 rounded-lg p-4 mb-5 transition-colors;
+  }
+  legend {
+    @apply px-2 font-medium text-gray-700;
+  }
+  button {
+    @apply w-full p-3 bg-blue-600 text-white rounded-lg text-lg font-medium transition-all;
+    &:hover {
+      @apply bg-blue-700;
+    }
+    &:active {
+      @apply scale-95;
+    }
+  }
+}
+
+@layer components {
+  .container {
+    @apply bg-white p-8 rounded-xl shadow-xl w-full max-w-[500px] mx-auto animate-fade-in;
+  }
+  .form-group {
+    @apply mb-5 relative;
+  }
+  .checkbox-group {
+    @apply mb-2;
+    input[type="checkbox"] {
+      @apply mr-2 w-4 h-4 cursor-pointer accent-blue-600;
+      /* Reset to original small size */
+    }
+    label {
+      @apply flex items-center cursor-pointer text-gray-600 transition-colors;
+      &:hover {
+        @apply text-blue-600;
+      }
+    }
+  }
+  .error {
+    @apply text-red-600 text-center mt-4 font-medium;
+  }
+  
+  /* Leaderboard Styles */
+  .leaderboard-container {
+    @apply bg-white rounded-lg shadow-lg overflow-hidden my-6 border border-gray-200 animate-fade-in;
+  }
+  
+  .leaderboard-table {
+    @apply min-w-full divide-y divide-gray-200;
+  }
+  
+  .leaderboard-header {
+    @apply bg-gradient-to-r from-blue-600 to-blue-700;
+  }
+  
+  .leaderboard-header th {
+    @apply px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider;
+  }
+  
+  .leaderboard-body {
+    @apply bg-white divide-y divide-gray-200;
+  }
+  
+  .leaderboard-row {
+    @apply hover:bg-blue-50 transition-colors duration-150;
+  }
+  
+  .leaderboard-row:nth-child(even) {
+    @apply bg-gray-50;
+  }
+  
+  .leaderboard-cell {
+    @apply px-6 py-4 whitespace-nowrap text-sm text-gray-700;
+  }
+  
+  .rank-cell {
+    @apply px-6 py-4 whitespace-nowrap font-bold;
+  }
+  
+  .top-rank {
+    @apply text-blue-600;
+  }
+  
+  .player-cell {
+    @apply px-6 py-4 whitespace-nowrap font-medium text-gray-900;
+  }
+  
+  .round-cell {
+    @apply px-6 py-4 whitespace-nowrap font-semibold;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 1s ease-in-out;
+}
+
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: #333;
+}
+
+li {
+  float: left;
+}
+
+li a {
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+
+/* Change the link color to #111 (black) on hover */
+li a:hover {
+  background-color: #111;
+}
