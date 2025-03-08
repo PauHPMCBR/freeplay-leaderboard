@@ -97,7 +97,7 @@ export default function AppBar() {
                   className="bg-gray-300 flex items-center gap-2 hover:bg-gray-100 px-3 py-2 rounded-lg transition-colors"
                 >
                   <img
-                    src={session.user?.image || '/default-avatar.png'}
+                    src={`/${session.user.image}`}
                     className="w-8 h-8 rounded-full flex-shrink-0"
                     alt="Profile"
                   />
@@ -127,7 +127,7 @@ export default function AppBar() {
                     </Link>
                     <button
                       onClick={() => signOut()}
-                      className="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100 w-full text-left"
+                      className="block px-4 py-2 text-sm bg-red-700 text-white hover:bg-red-900 w-full text-left"
                     >
                       Sign Out
                     </button>

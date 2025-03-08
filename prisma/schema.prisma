@@ -52,26 +52,27 @@ model Challenge {
 }
 
 model Submission {
-  id              String      @id @default(cuid())
-  user            User        @relation(fields: [userId], references: [id])
-  userId          String
-  btd6Map         BTD6Map     @relation(fields: [btd6MapId], references: [id])
-  btd6MapId       String
-  gameType        GameType    @relation(fields: [gameTypeId], references: [id])
-  gameTypeId      String
-  heroes          Hero[]      @relation("SubmissionHeroes")
-  version         String
-  challenges      Challenge[] @relation("SubmissionChallenges")
-  highestRound    Int
-  players         Int         @default(1)
-  seed            Int?
-  mediaLink       String?
-  screenshotPath  String?
-  saveFilePath    String?
-  additionalNotes String
-  verified        Boolean     @default(false)
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  id               String      @id @default(cuid())
+  user             User        @relation(fields: [userId], references: [id])
+  userId           String
+  btd6Map          BTD6Map     @relation(fields: [btd6MapId], references: [id])
+  btd6MapId        String
+  gameType         GameType    @relation(fields: [gameTypeId], references: [id])
+  gameTypeId       String
+  heroes           Hero[]      @relation("SubmissionHeroes")
+  version          String
+  challenges       Challenge[] @relation("SubmissionChallenges")
+  highestRound     Int
+  players          Int         @default(1)
+  seed             String?
+  mediaLink        String?
+  screenshotPath   String?
+  saveFilePath     String?
+  popcountFilePath String?
+  additionalNotes  String
+  verified         Boolean     @default(false)
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
 
   @@index([btd6MapId, gameTypeId, highestRound])
   @@index([userId])
@@ -79,16 +80,19 @@ model Submission {
 }
 
 model User {
-  id            String       @id @default(cuid())
-  name          String
-  email         String?      @unique
-  emailVerified DateTime?
-  image         String?
-  admin         Boolean      @default(false)
-  verifier      Boolean      @default(false)
-  submissions   Submission[]
-  accounts      Account[]
-  sessions      Session[]
+  id              String       @id @default(cuid())
+  name            String
+  email           String?      @unique
+  emailVerified   DateTime?
+  discordId       String?
+  youtubeChannel  String?
+  additionalNotes String?
+  image           String       @default("DartMonkey.png")
+  admin           Boolean      @default(false)
+  verifier        Boolean      @default(false)
+  submissions     Submission[]
+  accounts        Account[]
+  sessions        Session[]
 }
 
 // Add these if missing (NextAuth required models)

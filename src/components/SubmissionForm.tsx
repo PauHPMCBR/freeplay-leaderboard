@@ -11,7 +11,7 @@ type SubmitFormData = {
   heroIds: string[];
   version: string;
   players: number;
-  seed?: number;
+  seed?: string;
   highestRound: number;
   challengeIds: string[];
   mediaLink?: string;
@@ -25,7 +25,7 @@ export default function SubmissionForm() {
     heroIds: [''],
     version: '',
     players: 1,
-    seed: undefined,
+    seed: '',
     challengeIds: [],
     highestRound: 0,
     mediaLink: '',
@@ -204,7 +204,7 @@ export default function SubmissionForm() {
         heroIds: [''],
         version: '',
         players: 1,
-        seed: undefined,
+        seed: '',
         challengeIds: [],
         highestRound: 0,
         mediaLink: '',

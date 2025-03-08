@@ -2,7 +2,7 @@
 import useSWR from 'swr'
 import React from 'react'
 import { useRouter } from 'next/router'
-import { SubmissionSummary } from '@/pages/api/leaderboard'
+import { SubmissionSummary } from '@/pages/api/submissions/list'
 
 const fetcher = (url: string) => fetch(url).then(res => res.json())
 
@@ -15,15 +15,24 @@ export const formatDate = (dateString: string) => {
   }).format(date);
 };
 
-export default function Leaderboard({ btd6Map, gameType }: {
+export default function Leaderboard({ btd6Map, gameType, user, orderBy, ascOrderB }: {
   btd6Map?: string
   gameType?: string
+  user?: string
+  orderBy?: string
+  ascOrderB?: boolean
 }) {
-  const router = useRouter()
+  const router = useRouter();
+
+  const ascOrder = ascOrderB !== undefined ? (ascOrderB ? "true" : "false") : undefined;
+  
   const { data, error } = useSWR<SubmissionSummary[]>(
-    `/api/leaderboard?${new URLSearchParams({
+    `/api/submissions/list?${new URLSearchParams({
       ...(btd6Map && { btd6Map }),
-      ...(gameType && { gameType })
+      ...(gameType && { gameType }),
+      ...(user && { user }),
+      ...(orderBy && { orderBy }),
+      ...(ascOrder && { ascOrder })
     })}`,
     fetcher,
     { refreshInterval: 30000 }

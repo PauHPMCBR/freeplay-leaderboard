@@ -18,11 +18,11 @@ export const config = {
 const exec = promisify(execFile);
 
 // Configure paths
-const UPLOAD_DIR = path.join(process.cwd(), 'public/uploads');
+export const UPLOAD_DIR = path.join(process.cwd(), 'public/uploads');
 const PYTHON_SCRIPT_PATH = path.join(process.cwd(), 'scripts/saveGenerator/generateMapSave.py');
 
 // Create directories if they don't exist
-const ensureDir = async (dirPath: string) => {
+export const ensureDir = async (dirPath: string) => {
   try {
     await fs.mkdir(dirPath, { recursive: true });
   } catch (error) {
@@ -34,29 +34,37 @@ const ensureDir = async (dirPath: string) => {
 Promise.all([
   ensureDir(path.join(UPLOAD_DIR, 'screenshots')),
   ensureDir(path.join(UPLOAD_DIR, 'saves')),
+  ensureDir(path.join(UPLOAD_DIR, 'popcounts')),
   ensureDir(path.join(UPLOAD_DIR, 'temp')),
 ]);
 
 // File processing functions
-const processSaveFile = async (inputPath: string, mapName: string, outputFilename: string) => {
-  const outputPath = path.join(UPLOAD_DIR, 'saves', outputFilename);
+const processSaveFile = async (
+  inputPath: string, 
+  mapName: string, 
+  saveFilename: string,
+  popcountFilename: string
+) => {
+  const savePath = path.join(UPLOAD_DIR, 'saves', saveFilename);
+  const popcountPath = path.join(UPLOAD_DIR, 'popcounts', popcountFilename);
   
   try {
     await exec('python', [
       PYTHON_SCRIPT_PATH,
       inputPath,
       mapName,
-      outputPath
+      savePath,
+      popcountPath,
     ]);
     
-    return outputPath;
+    return { savePath, popcountPath };
   } finally {
     // Clean up original upload
     await fs.unlink(inputPath).catch(() => {});
   }
 };
 
-const moveFile = async (file: formidable.File, targetDir: string) => {
+export const moveFile = async (file: formidable.File, targetDir: string) => {
   const newPath = path.join(targetDir, path.basename(file.filepath));
   await fs.rename(file.filepath, newPath);
   return newPath;
@@ -103,7 +111,7 @@ export default async function handler(
     const highestRound = parseInt(fields.highestRound?.[0] as string, 10);
     const version = fields.version?.[0] as string;
     const numberPlayers = fields.numberPlayers ? parseInt(fields.numberPlayers[0] as string, 10) : 1;
-    const seed = fields.seed ? parseInt(fields.seed[0] as string, 10) : undefined;
+    const seed = fields.seed?.[0] as string;
     const mediaLink = fields.mediaLink?.[0] as string;
     const additionalNotes = fields.additionalNotes?.[0] as string;
     const heroIds = fields.heroIds?.[0] as string;
@@ -115,6 +123,7 @@ export default async function handler(
     // Process files
     let screenshotPath: string | null = null;
     let processedSavePath: string | null = null;
+    let popcountPath: string | null = null;
 
     if (files.screenshot?.[0]) {
       screenshotPath = await moveFile(
@@ -131,6 +140,7 @@ export default async function handler(
     if (files.saveFile?.[0]) {
       const saveFile = files.saveFile[0];
       const outputFilename = `${Date.now()}.save`;
+      const popcountFilename = `${Date.now()}.csv`;
 
       const btd6MapData = await prisma.bTD6Map.findUniqueOrThrow({
         where: {
@@ -138,14 +148,19 @@ export default async function handler(
         }
       });
 
-      processedSavePath = await processSaveFile(
+      const { savePath: sPath, popcountPath: pPath } = await processSaveFile(
         saveFile.filepath,
         btd6MapData.name.replaceAll(' ', '').replaceAll('\'', ''),
-        outputFilename
+        outputFilename,
+        popcountFilename,
       );
       processedSavePath = path.relative(
         path.join(process.cwd(), 'public'),
-        processedSavePath
+        sPath
+      );
+      popcountPath = path.relative(
+        path.join(process.cwd(), 'public'),
+        pPath
       );
     }
 
@@ -163,6 +178,7 @@ export default async function handler(
         additionalNotes: additionalNotes,
         screenshotPath,
         saveFilePath: processedSavePath,
+        popcountFilePath: popcountPath,
         challenges: {
           connect: (challengeIds).split(',').map((id => ({ id }))),
         },

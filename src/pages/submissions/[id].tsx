@@ -8,9 +8,13 @@ import { SubmissionDetailed } from '../api/submissions/submission';
 export default function SubmissionDetails() {
   const router = useRouter();
   const { id } = router.query;
+  console.log("test2", id);
   const [submission, setSubmission] = useState<SubmissionDetailed | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [showPopCount, setShowPopCount] = useState(false);
+  const [popCountData, setPopCountData] = useState<Array<{towerType: string, popCount: number}>>([]);
+  const [popCountLoading, setPopCountLoading] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -36,6 +40,50 @@ export default function SubmissionDetails() {
 
     fetchSubmission();
   }, [id]);
+
+  // Function to load pop count data when toggled
+  const loadPopCountData = async () => {
+    if (!submission?.popcountFilePath) return;
+    
+    try {
+      setPopCountLoading(true);
+      const response = await fetch(`/${submission.popcountFilePath}`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to load pop count data');
+      }
+      
+      const csvText = await response.text();
+      
+      // Parse CSV
+      const rows = csvText.split('\n');
+      
+      const data = rows.slice(1)
+        .filter(row => row.trim() !== '')
+        .map(row => {
+          const values = row.split(',');
+          return {
+            towerType: values[0],
+            popCount: parseInt(values[1], 10)
+          };
+        });
+      
+      setPopCountData(data);
+    } catch (err) {
+      console.error("Error loading pop count data:", err);
+      setPopCountData([]);
+    } finally {
+      setPopCountLoading(false);
+    }
+  };
+
+  // Toggle pop count display and load data if needed
+  const togglePopCount = () => {
+    if (!showPopCount && popCountData.length === 0) {
+      loadPopCountData();
+    }
+    setShowPopCount(!showPopCount);
+  };
 
   // Helper function to determine if media is embeddable
   const isEmbeddableVideo = (url?: string) => {
@@ -140,6 +188,11 @@ export default function SubmissionDetails() {
     });
   };
 
+  // Format large numbers with commas
+  const formatNumber = (num: number) => {
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  };
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <div className="bg-white rounded-xl shadow-xl overflow-hidden">
@@ -154,8 +207,8 @@ export default function SubmissionDetails() {
           <div className="flex items-center mt-2">
             <div className="flex items-center">
               {submission.user.image ? (
-                <Image 
-                  src={submission.user.image} 
+                <img 
+                  src={`/${submission.user.image}`}
                   alt={submission.user.name}
                   width={32}
                   height={32}
@@ -170,55 +223,22 @@ export default function SubmissionDetails() {
             </div>
             <span className="mx-2">•</span>
             <span>{formatDate(submission.createdAt.toString())}</span>
-            {submission.verified && (
+            {submission.verified ? (
               <>
                 <span className="mx-2">•</span>
                 <span className="bg-green-500 text-white px-2 py-0.5 rounded-full text-xs font-medium">Verified</span>
+              </>
+            ) : (
+              <>
+                <span className="mx-2">•</span>
+                <span className="bg-red-500 text-white px-2 py-0.5 rounded-full text-xs font-medium">Not Verified</span>
               </>
             )}
           </div>
         </div>
 
-        {/* Media Section */}
-        {submission.mediaLink && (
-          <div className="p-6 border-b border-gray-200">
-            <h2 className="text-xl font-semibold mb-4">Media</h2>
-            {isEmbeddableVideo(submission.mediaLink) ? (
-              <div className="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden">
-                <iframe 
-                  src={getEmbedUrl(submission.mediaLink)}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                  allowFullScreen
-                  className="w-full h-full"
-                ></iframe>
-              </div>
-            ) : isImage(submission.mediaLink) ? (
-              <div className="rounded-lg overflow-hidden">
-                <Image 
-                  src={submission.mediaLink} 
-                  alt="Submission media" 
-                  width={1000}
-                  height={600}
-                  className="w-full h-auto"
-                />
-              </div>
-            ) : (
-              <div>
-                <a 
-                  href={submission.mediaLink} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-800 underline"
-                >
-                  View Media Link
-                </a>
-              </div>
-            )}
-          </div>
-        )}
-
         {/* Details Section */}
-        <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="p-6 grid grid-cols-1 gap-6">
           <div>
             <h2 className="text-xl font-semibold mb-4">Game Details</h2>
             <div className="bg-gray-50 rounded-lg p-4">
@@ -232,32 +252,204 @@ export default function SubmissionDetails() {
                   <p className="font-medium">{submission.gameType.name}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Heroes</p>
-                  <p className="font-medium">{submission.heroes.map(hero => hero.name)}</p>
+                  <p className="text-sm text-gray-500">Game Version</p>
+                  <p className="font-medium">v{submission.version}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Players</p>
+                  <p className="font-medium">{submission.players}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Highest Round</p>
                   <p className="font-medium">{submission.highestRound}</p>
                 </div>
+                {submission.seed && (
+                  <div>
+                    <p className="text-sm text-gray-500">Seed</p>
+                    <p className="font-medium">{submission.seed}</p>
+                  </div>
+                )}
+                <div>
+                  <p className="text-sm text-gray-500">Submitted</p>
+                  <p className="font-medium">{formatDate(submission.createdAt.toString())}</p>
+                </div>
+
+                {/* Heroes display */}
+                <div className="col-span-2">
+                  <p className="text-sm text-gray-500">Heroes</p>
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {submission.heroes.map(hero => (
+                      <span 
+                        key={hero.id}
+                        className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm"
+                      >
+                        {hero.name}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Challenges display */}
+                {submission.challenges.length > 0 && (
+                <div className="col-span-2">
+                  <p className="text-sm text-gray-500">Challenges</p>
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {submission.challenges.map(challenge => (
+                      <span 
+                        key={challenge.id}
+                        className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm"
+                      >
+                        {challenge.name}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                )}
               </div>
             </div>
           </div>
-
-          {submission.challenges.length > 0 && (
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Challenges</h2>
-              <div className="bg-gray-50 rounded-lg p-4">
-                <ul className="space-y-2">
-                  {submission.challenges.map(challenge => (
-                    <li key={challenge.id} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full inline-block mr-2 mb-2">
-                      {challenge.name}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          )}
         </div>
+
+        {/* Media Section */}
+        {(submission.mediaLink || submission.screenshotPath) && (
+          <div className="p-6 border-t border-gray-200">
+            <h2 className="text-xl font-semibold mb-4">Media Evidence</h2>
+
+            {/* External Media Link */}
+            {submission.screenshotPath && (
+              <div className="mb-6">
+                <h3 className="text-lg font-medium mb-2">Screenshot</h3>
+                <div className="relative aspect-video rounded-lg overflow-hidden bg-gray-100">
+                  <Image
+                    src={`/${submission.screenshotPath.replaceAll('\\', '/')}`}
+                    alt="Game screenshot proof"
+                    fill
+                    className="object-contain"
+                    quality={90}
+                    sizes="(max-width: 768px) 100vw, 768px"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Video Embed */}
+            {submission.mediaLink && (
+              <div className="mt-6">
+                {isEmbeddableVideo(submission.mediaLink) ? (
+                  <div className="relative aspect-video rounded-lg overflow-hidden bg-gray-100">
+                    <iframe 
+                      src={getEmbedUrl(submission.mediaLink)}
+                      className="absolute inset-0 w-full h-full"
+                      allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      title="Video proof embed"
+                      referrerPolicy="strict-origin-when-cross-origin"
+                    />
+                  </div>
+                ) : isImage(submission.mediaLink) ? (
+                  <div className="relative aspect-video rounded-lg overflow-hidden bg-gray-100">
+                    <Image
+                      src={submission.mediaLink}
+                      alt="Additional media proof"
+                      fill
+                      className="object-contain"
+                      quality={90}
+                      sizes="(max-width: 768px) 100vw, 768px"
+                    />
+                  </div>
+                ) : (
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <a 
+                      href={submission.mediaLink} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-800 underline flex items-center"
+                    >
+                      <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                      View External Media Proof
+                    </a>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Pop Count Section */}
+        {submission.popcountFilePath && (
+          <div className="p-6 border-t border-gray-200">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">Tower Pop Counts</h2>
+              <button 
+                onClick={togglePopCount}
+                className="flex items-center font-medium"
+              >
+                {showPopCount ? (
+                  <>
+                    <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                    </svg>
+                    Hide Pop Counts
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                    Show Pop Counts
+                  </>
+                )}
+              </button>
+            </div>
+            
+            {showPopCount && (
+              <div className="bg-gray-50 rounded-lg p-4 animate-fadeIn">
+                {popCountLoading ? (
+                  <div className="flex justify-center py-8">
+                    <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                ) : popCountData.length > 0 ? (
+                  <>
+                    <div className="overflow-x-auto">
+                      <table className="w-full">
+                        <thead>
+                          <tr className="bg-gray-100">
+                            <th className="text-left p-2 font-semibold">Tower Type</th>
+                            <th className="text-right p-2 font-semibold">Pop Count</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {popCountData.map((item, index) => (
+                            <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                              <td className="p-2 border-t border-gray-200">{item.towerType}</td>
+                              <td className="p-2 text-right border-t border-gray-200">{formatNumber(item.popCount)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                    <div className="mt-4 text-sm text-gray-500">
+                      <a 
+                        href={`/${submission.popcountFilePath}`}
+                        download
+                        className="inline-flex items-center text-blue-600 hover:text-blue-800"
+                      >
+                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        Download full CSV
+                      </a>
+                    </div>
+                  </>
+                ) : (
+                  <p className="text-gray-600 py-4 text-center">Failed to load pop count data.</p>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Notes Section */}
         {submission.additionalNotes && (
@@ -270,25 +462,13 @@ export default function SubmissionDetails() {
         )}
 
         {/* File Downloads Section */}
-        {(submission.screenshotPath || submission.saveFilePath) && (
+        {(submission.saveFilePath) && (
           <div className="p-6 border-t border-gray-200">
             <h2 className="text-xl font-semibold mb-4">Files</h2>
-            <div className="flex flex-wrap gap-3">
-              {submission.screenshotPath && (
-                <a 
-                  href={submission.screenshotPath}
-                  download
-                  className="inline-flex items-center bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg transition-colors"
-                >
-                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                  Screenshot
-                </a>
-              )}
+            <div className="flex flex-wrap gap-3">              
               {submission.saveFilePath && (
                 <a 
-                  href={submission.saveFilePath}
+                  href={`/${submission.saveFilePath}`}
                   download
                   className="inline-flex items-center bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg transition-colors"
                 >
@@ -304,11 +484,8 @@ export default function SubmissionDetails() {
 
         {/* Action buttons */}
         <div className="p-6 border-t border-gray-200 flex flex-col sm:flex-row gap-4">
-          <Link href="/submissions" className="block p-3 bg-gray-200 text-gray-800 rounded-lg text-center text-lg font-medium hover:bg-gray-300 transition-all">
-            Back to Submissions
-          </Link>
           <Link href={`/leaderboard?btd6Map=${submission.btd6Map.id}&gameType=${submission.gameType.id}`} className="block p-3 bg-blue-600 text-white rounded-lg text-center text-lg font-medium hover:bg-blue-700 transition-all">
-            View Leaderboard
+            View in Leaderboard
           </Link>
         </div>
       </div>

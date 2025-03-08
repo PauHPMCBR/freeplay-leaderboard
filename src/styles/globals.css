@@ -95,6 +95,18 @@
   .leaderboard-cell {
     @apply px-6 py-4 whitespace-nowrap text-sm text-gray-700;
   }
+
+  .detail-badge {
+    @apply bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm;
+  }
+  
+  .file-download {
+    @apply inline-flex items-center bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg transition-colors;
+  }
+  
+  .media-skeleton {
+    @apply absolute inset-0 bg-gray-200 animate-pulse;
+  }
   
   .rank-cell {
     @apply px-6 py-4 whitespace-nowrap font-bold;
