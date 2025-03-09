@@ -10,30 +10,25 @@ export default async function handler(
   }
 
   // Get the mapId and gameTypeId from query parameters
-  const { mapId, gameTypeId } = req.query;
-
-  // Validate required parameters
-  if (!mapId || typeof mapId !== 'string' || !gameTypeId || typeof gameTypeId !== 'string') {
-    return res.status(400).json({
-      message: 'mapId and gameTypeId parameters are required',
-    });
-  }
+  const { btd6Map, gameType } = req.query;
 
   try {
-    // Find challenges that are available for the given map and game type
+    const whereClause: {
+      btd6Maps?: { some: { id: string } },
+      gameTypes?: { some: { id: string } }
+    } = {};
+    
+    if (btd6Map && btd6Map !== '') {
+      whereClause.btd6Maps = { some: { id: btd6Map as string } };
+    }
+    
+    if (gameType && gameType !== '') {
+      whereClause.gameTypes = { some: { id: gameType as string } };
+    }
+  
+    // Find challenges that are available for BOTH the given map and game type
     const challenges = await prisma.challenge.findMany({
-      where: {
-        btd6Maps: {
-          some: {
-            id: mapId,
-          },
-        },
-        gameTypes: {
-          some: {
-            id: gameTypeId,
-          },
-        },
-      },
+      where: whereClause,
       select: {
         id: true,
         name: true,

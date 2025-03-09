@@ -3,11 +3,14 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 import React, { useEffect, useState } from 'react';
-import { SubmissionDetailed } from '../api/submissions/submission';
+import { SubmissionDetailed } from '../api/submissions/[id]';
+import { useSession } from 'next-auth/react';
+import SubmissionVerifyForm from '@/components/SubmissionVerifyForm';
 
 export default function SubmissionDetails() {
   const router = useRouter();
-  const { id } = router.query;
+  const { data: session } = useSession();
+  const { id, verifierEdit } = router.query;
   console.log("test2", id);
   const [submission, setSubmission] = useState<SubmissionDetailed | null>(null);
   const [loading, setLoading] = useState(true);
@@ -23,7 +26,7 @@ export default function SubmissionDetails() {
       try {
         setLoading(true);
         // Replace with your actual API endpoint
-        const response = await fetch(`/api/submissions/submission?submissionId=${id}`);
+        const response = await fetch(`/api/submissions/${id}`);
         
         if (!response.ok) {
           throw new Error('Failed to fetch submission');
@@ -205,7 +208,7 @@ export default function SubmissionDetails() {
             </div>
           </div>
           <div className="flex items-center mt-2">
-            <div className="flex items-center">
+            <Link href={`/user/${submission.user.id}`} className="flex items-center" >
               {submission.user.image ? (
                 <img 
                   src={`/${submission.user.image}`}
@@ -220,7 +223,7 @@ export default function SubmissionDetails() {
                 </div>
               )}
               <span className="font-medium">{submission.user.name}</span>
-            </div>
+            </Link>
             <span className="mx-2">•</span>
             <span>{formatDate(submission.createdAt.toString())}</span>
             {submission.verified ? (
@@ -461,6 +464,20 @@ export default function SubmissionDetails() {
           </div>
         )}
 
+        {/* Verifier Notes Section */}
+        {(verifierEdit && session?.user.verifier) ? (
+          <SubmissionVerifyForm submissionId={submission.submissionId}>
+            
+          </SubmissionVerifyForm>
+        ) : (submission.additionalVerifierNotes && (
+          <div className="p-6 border-t border-gray-200">
+            <h2 className="text-xl font-semibold mb-4">Verifier Notes</h2>
+            <div className="bg-gray-50 rounded-lg p-4">
+              <p className="whitespace-pre-wrap">{submission.additionalVerifierNotes}</p>
+            </div>
+          </div>
+        ))}
+
         {/* File Downloads Section */}
         {(submission.saveFilePath) && (
           <div className="p-6 border-t border-gray-200">
@@ -487,6 +504,11 @@ export default function SubmissionDetails() {
           <Link href={`/leaderboard?btd6Map=${submission.btd6Map.id}&gameType=${submission.gameType.id}`} className="block p-3 bg-blue-600 text-white rounded-lg text-center text-lg font-medium hover:bg-blue-700 transition-all">
             View in Leaderboard
           </Link>
+          {session?.user.verifier && (
+          <Link href={`/submissions/${id}?verifierEdit=true`} className="block p-3 bg-blue-600 text-white rounded-lg text-center text-lg font-medium hover:bg-blue-700 transition-all">
+            Edit verification
+          </Link>
+          )}
         </div>
       </div>
     </div>

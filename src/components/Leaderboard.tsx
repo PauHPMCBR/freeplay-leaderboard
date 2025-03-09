@@ -15,10 +15,16 @@ export const formatDate = (dateString: string) => {
   }).format(date);
 };
 
-export default function Leaderboard({ btd6Map, gameType, user, orderBy, ascOrderB }: {
+export default function Leaderboard({ btd6Map, gameType, user, verified, orderBy, ascOrderB }: {
   btd6Map?: string
   gameType?: string
+  heroes?: string
+  versionStart?: string
+  versionEnd?: string
+  players?: string
+  challenges?: string
   user?: string
+  verified?: string
   orderBy?: string
   ascOrderB?: boolean
 }) {
@@ -31,6 +37,7 @@ export default function Leaderboard({ btd6Map, gameType, user, orderBy, ascOrder
       ...(btd6Map && { btd6Map }),
       ...(gameType && { gameType }),
       ...(user && { user }),
+      ...(verified && { verified }),
       ...(orderBy && { orderBy }),
       ...(ascOrder && { ascOrder })
     })}`,

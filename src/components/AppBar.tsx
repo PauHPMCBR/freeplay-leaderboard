@@ -74,7 +74,7 @@ export default function AppBar() {
               onClick={(e) => handleNavigation(e, "/leaderboard")}
               className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
             >
-              All Leaderboards
+              Leaderboard
             </Link>
             
             {session && (
@@ -125,6 +125,16 @@ export default function AppBar() {
                     >
                       Your Profile
                     </Link>
+                    {/* Admin Dashboard Link */}
+                    {session.user?.admin && (
+                      <Link
+                        href="/admin/dashboard"
+                        onClick={(e) => handleNavigation(e, "/admin/dashboard")}
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                      >
+                        Admin Dashboard
+                      </Link>
+                    )}
                     <button
                       onClick={() => signOut()}
                       className="block px-4 py-2 text-sm bg-red-700 text-white hover:bg-red-900 w-full text-left"
@@ -155,7 +165,7 @@ export default function AppBar() {
               onClick={(e) => handleNavigation(e, "/leaderboard")}
               className="block bg-blue-600 text-white px-3 py-2 rounded-md text-base font-medium text-center"
             >
-              All Leaderboards
+              Leaderboard
             </Link>
             
             {session && (
@@ -172,7 +182,7 @@ export default function AppBar() {
               <div className="flex flex-col space-y-2 mt-2 bg-gray-50 p-3 rounded-lg">
                 <div className="flex items-center gap-2 border-b border-gray-200 pb-2">
                   <img
-                    src={session.user?.image || '/default-avatar.png'}
+                    src={`/${session.user.image}`}
                     className="w-8 h-8 rounded-full flex-shrink-0"
                     alt="Profile"
                   />
@@ -188,6 +198,17 @@ export default function AppBar() {
                 >
                   Your Profile
                 </Link>
+
+                {/* Admin Dashboard Link */}
+                {session.user?.admin && (
+                  <Link
+                    href="/admin/dashboard"
+                    onClick={(e) => handleNavigation(e, "/admin/dashboard")}
+                    className="block bg-red-600 text-white px-3 py-2 rounded-md text-base font-medium text-center"
+                  >
+                    Admin Dashboard
+                  </Link>
+                )}
                 
                 <button
                   onClick={() => signOut()}

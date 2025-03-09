@@ -52,27 +52,29 @@ model Challenge {
 }
 
 model Submission {
-  id               String      @id @default(cuid())
-  user             User        @relation(fields: [userId], references: [id])
-  userId           String
-  btd6Map          BTD6Map     @relation(fields: [btd6MapId], references: [id])
-  btd6MapId        String
-  gameType         GameType    @relation(fields: [gameTypeId], references: [id])
-  gameTypeId       String
-  heroes           Hero[]      @relation("SubmissionHeroes")
-  version          String
-  challenges       Challenge[] @relation("SubmissionChallenges")
-  highestRound     Int
-  players          Int         @default(1)
-  seed             String?
-  mediaLink        String?
-  screenshotPath   String?
-  saveFilePath     String?
-  popcountFilePath String?
-  additionalNotes  String
-  verified         Boolean     @default(false)
-  createdAt        DateTime    @default(now())
-  updatedAt        DateTime    @updatedAt
+  id                      String      @id @default(cuid())
+  user                    User        @relation(fields: [userId], references: [id])
+  userId                  String
+  btd6Map                 BTD6Map     @relation(fields: [btd6MapId], references: [id])
+  btd6MapId               String
+  gameType                GameType    @relation(fields: [gameTypeId], references: [id])
+  gameTypeId              String
+  heroes                  Hero[]      @relation("SubmissionHeroes")
+  version                 String
+  challenges              Challenge[] @relation("SubmissionChallenges")
+  highestRound            Int
+  players                 Int         @default(1)
+  seed                    String?
+  mediaLink               String?
+  screenshotPath          String?
+  saveFilePath            String?
+  popcountFilePath        String?
+  additionalNotes         String?
+  additionalVerifierNotes String?
+  verified                Boolean     @default(false)
+  verifierId              String?
+  createdAt               DateTime    @default(now())
+  updatedAt               DateTime    @updatedAt
 
   @@index([btd6MapId, gameTypeId, highestRound])
   @@index([userId])
@@ -90,6 +92,7 @@ model User {
   image           String       @default("DartMonkey.png")
   admin           Boolean      @default(false)
   verifier        Boolean      @default(false)
+  createdAt       DateTime     @default(now())
   submissions     Submission[]
   accounts        Account[]
   sessions        Session[]

@@ -1,16 +1,10 @@
-import NextAuth from "next-auth";
+import NextAuth, { Session, User } from "next-auth";
 import GitHubProvider from "next-auth/providers/github"
 import { PrismaAdapter } from "@next-auth/prisma-adapter"
 import GoogleProvider from "next-auth/providers/google"
 import prisma from "@/lib/prisma"
-
-type SessionProps = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  session: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  user: any;
-};
-
+import { JWT } from "next-auth/jwt";
+import { AdapterUser } from "next-auth/adapters";
 
 export const authOptions = {
   adapter: PrismaAdapter(prisma),
@@ -25,10 +19,39 @@ export const authOptions = {
     }),
   ],
   callbacks: {
-    async session({ session, user }: SessionProps) {
+    async signIn( { user }: { user: User } ) {
+      // Initial admin setup during first sign-in
+      if (user.email && process.env.ADMIN_EMAILS?.split(',').includes(user.email)) {
+        await prisma.user.update({
+          where: { email: user.email },
+          data: { admin: true },
+        });
+      }
+      return true;
+    },
+
+    async session({ session, user }: { session: Session; token: JWT; user: AdapterUser; }) {
       session.user.id = user.id;
+      // Add admin and verifier status to session
+      const dbUser = await prisma.user.findUnique({
+        where: { id: user.id },
+        select: { admin: true, verifier: true }
+      });
+      session.user.admin = dbUser?.admin || false;
+      session.user.verifier = dbUser?.verifier || false;
       return session;
     },
+  },
+  events: {
+    async createUser( { user }: { user: User } ) {
+      // Handle new user creation
+      if (user.email && process.env.ADMIN_EMAILS?.split(',').includes(user.email)) {
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { admin: true },
+        });
+      }
+    }
   }
   // ... other config
 }

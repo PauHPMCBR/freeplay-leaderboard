@@ -17,8 +17,10 @@ export type SubmissionDetailed = {
   screenshotPath?: string,
   saveFilePath?: string,
   popcountFilePath?: string,
-  additionalNotes: string,
+  additionalNotes?: string,
+  additionalVerifierNotes?: string,
   verified: boolean,
+  verifierId?: string,
   createdAt: Date,
   updatedAt: Date,
 };
@@ -27,8 +29,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const { submissionId } = req.query;
-  console.log("hi,", submissionId)
+  const submissionId = req.query.id;
 
   try {
     if (typeof(submissionId) !== "string") {
@@ -67,8 +68,10 @@ export default async function handler(
       screenshotPath: submission.screenshotPath ?? undefined,
       saveFilePath: submission.saveFilePath ?? undefined,
       popcountFilePath: submission.popcountFilePath ?? undefined,
-      additionalNotes: submission.additionalNotes,
+      additionalNotes: submission.additionalNotes ?? undefined,
+      additionalVerifierNotes: submission.additionalVerifierNotes ?? undefined,
       verified: submission.verified,
+      verifierId: submission.verifierId ?? undefined,
       createdAt: submission.createdAt,
       updatedAt: submission.updatedAt,
     }

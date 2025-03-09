@@ -113,7 +113,8 @@ async function main() {
     ...beginnerMaps,
     ...intermediateMaps,
     ...advancedMaps,
-    ...expertMaps
+    ...expertMaps,
+    { name: 'Custom Map', code: 'custom_map', difficulty: 'INTERMEDIATE' }
   ];
 
   const allMapCodes = allBtd6Maps.map(btd6Map => btd6Map.code);
@@ -210,7 +211,21 @@ async function main() {
       name: 'No Powers',
       code: 'no_powers',
       maps: 'all',
-      gameTypes: 'all'
+      gameTypes: [
+        'easy',
+        'primary_only',
+        'deflation',
+        'medium',
+        'military_only',
+        'apopalypse',
+        'reverse',
+        'hard',
+        'magic_only',
+        'double_hp_moabs',
+        'half_cash',
+        'alternate_bloons_rounds',
+        'impoppable',
+      ] // Exclude CHIMPS
     },
     {
       name: 'Used Modifiers',

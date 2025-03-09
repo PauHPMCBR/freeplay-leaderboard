@@ -6,14 +6,11 @@ export default async function handler(
   res: NextApiResponse
 ) {
   const userId = req.query.id as string;
-  console.log("fetching user data: ", userId)
 
   try {
     const user = await prisma.user.findUnique({
       where: { id: userId },
     });
-
-    console.log(user);
 
     if (!user) return res.status(404).json({ error: 'User not found' })
     

@@ -17,7 +17,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const { btd6Map, gameType, user, orderBy, ascOrder, start, amount } = req.query
+  const { btd6Map, gameType, user, verified, orderBy, ascOrder, start, amount } = req.query
 
   console.log(btd6Map, gameType)
 
@@ -33,6 +33,9 @@ export default async function handler(
     }
     if (user && user !== '') {
       whereClause.userId = user;
+    }
+    if (verified && verified !== '') {
+      whereClause.verified = verified == 'true';
     }
 
     const orderByField = (orderBy?.toString() || '').toLowerCase();
