@@ -15,6 +15,7 @@ NEXTAUTH_URL="http://localhost:3000"
 NEXTAUTH_SECRET="your-secure-secret-here"
 GITHUB_ID=your_github_oauth_id
 GITHUB_SECRET=your_github_oauth_secret
+ADMIN_EMAILS=admin1@example.com,admin2@example.com
 ```
 
 3. **Start Database:**
