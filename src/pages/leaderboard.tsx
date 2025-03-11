@@ -69,14 +69,8 @@ export default function DynamicLeaderboard(): JSX.Element {
       
       {/* Main Content */}
       <div className="flex-1 p-4">
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold">Leaderboard</h1>
-          <button 
-            onClick={() => router.push('/leaderboard')}
-            className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-          >
-            Clear All Filters
-          </button>
         </div>
         <div className="mb-4">
           <ActiveFilters />
@@ -106,7 +100,7 @@ function ActiveFilters(): JSX.Element {
     versionEnd, 
     players, 
     challenges,
-    verified,
+    verified = 'include',
   } = router.query;
   
   const [filterLabels, setFilterLabels] = useState<FilterLabels>({
@@ -230,7 +224,7 @@ function ActiveFilters(): JSX.Element {
           <span>Map: {filterLabels.maps}</span>
           <button 
             onClick={() => removeFilter('btd6Map')} 
-            className="ml-2 text-gray-500 hover:text-gray-700"
+            className="ml-2 text-gray-500 hover:text-gray-700 bg-gray-800 size-10" 
             aria-label="Remove map filter"
           >
             ×
@@ -243,7 +237,7 @@ function ActiveFilters(): JSX.Element {
           <span>Game Type: {filterLabels.gameTypes}</span>
           <button 
             onClick={() => removeFilter('gameType')} 
-            className="ml-2 text-gray-500 hover:text-gray-700"
+            className="ml-2 text-gray-500 hover:text-gray-700 bg-gray-800 size-10" 
             aria-label="Remove game type filter"
           >
             ×
@@ -256,7 +250,7 @@ function ActiveFilters(): JSX.Element {
           <span>Hero: {hero}</span>
           <button 
             onClick={() => removeFilter('hero', hero)} 
-            className="ml-2 text-gray-500 hover:text-gray-700"
+            className="ml-2 text-gray-500 hover:text-gray-700 bg-gray-800 size-10" 
             aria-label={`Remove ${hero} filter`}
           >
             ×
@@ -269,7 +263,7 @@ function ActiveFilters(): JSX.Element {
           <span>Version Start: {versionStart}</span>
           <button 
             onClick={() => removeFilter('versionStart')} 
-            className="ml-2 text-gray-500 hover:text-gray-700"
+            className="ml-2 text-gray-500 hover:text-gray-700 bg-gray-800 size-10" 
             aria-label="Remove version filter"
           >
             ×
@@ -282,7 +276,7 @@ function ActiveFilters(): JSX.Element {
           <span>Version End: {versionEnd}</span>
           <button 
             onClick={() => removeFilter('versionEnd')} 
-            className="ml-2 text-gray-500 hover:text-gray-700"
+            className="ml-2 text-gray-500 hover:text-gray-700 bg-gray-800 size-10" 
             aria-label="Remove version filter"
           >
             ×
@@ -295,7 +289,7 @@ function ActiveFilters(): JSX.Element {
           <span>Players: {players}</span>
           <button 
             onClick={() => removeFilter('players')} 
-            className="ml-2 text-gray-500 hover:text-gray-700"
+            className="ml-2 text-gray-500 hover:text-gray-700 bg-gray-800 size-10" 
             aria-label="Remove players filter"
           >
             ×
@@ -315,7 +309,7 @@ function ActiveFilters(): JSX.Element {
           </span>
           <button 
             onClick={() => removeFilter('challenge', challenge.name)} 
-            className="ml-2 text-gray-500 hover:text-gray-700"
+            className="ml-2 text-gray-500 hover:text-gray-700 bg-gray-800 size-10" 
             aria-label={`Remove ${challenge.name} filter`}
           >
             ×
@@ -335,7 +329,7 @@ function ActiveFilters(): JSX.Element {
           </span>
           <button 
             onClick={() => removeFilter('verified')} 
-            className="ml-2 text-gray-500 hover:text-gray-700"
+            className="ml-2 text-gray-500 hover:text-gray-700 bg-gray-800 size-10" 
             aria-label={`Remove verified filter`}
           >
             ×

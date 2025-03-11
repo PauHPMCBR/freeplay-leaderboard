@@ -86,7 +86,7 @@ export default function SubmissionForm() {
       
       try {
         setIsLoading(true);
-        const res = await fetch(`/api/challenges?mapId=${formData.btd6MapId}&gameTypeId=${formData.gameTypeId}`);
+        const res = await fetch(`/api/challenges?btd6Map=${formData.btd6MapId}&gameType=${formData.gameTypeId}`);
         const data = await res.json();
         setAvailableChallenges(data.challenges);
         

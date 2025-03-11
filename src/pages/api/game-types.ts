@@ -10,7 +10,6 @@ export default async function handler(
   }
 
   try {
-    // Get all game types from the database model
     const gameTypes = await prisma.gameType.findMany({
       select: {
         id: true,
