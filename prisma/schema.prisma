@@ -84,6 +84,7 @@ model Submission {
 model User {
   id              String       @id @default(cuid())
   name            String
+  realUser        Boolean      @default(true)
   email           String?      @unique
   emailVerified   DateTime?
   discordId       String?

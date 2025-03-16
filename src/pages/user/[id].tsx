@@ -83,13 +83,19 @@ export default function UserProfile() {
 
           <div className="flex items-center mt-2">
           <h1 className="text-3xl font-bold">{user.name}</h1>
+          {!user.realUser && (
+            <>
+              <span className="mx-2"> </span>
+              <span className="bg-purple-500 text-white px-2 py-0.5 rounded-full text-xs font-medium">Artificial User</span>
+            </>
+          )}
           {user.verifier && (
-              <>
-                <span className="mx-2"> </span>
-                <span className="bg-green-500 text-white px-2 py-0.5 rounded-full text-xs font-medium">Verifier</span>
-              </>
-            )}
-            </div>
+            <>
+              <span className="mx-2"> </span>
+              <span className="bg-green-500 text-white px-2 py-0.5 rounded-full text-xs font-medium">Verifier</span>
+            </>
+          )}
+          </div>
           
           {/* Social Links */}
           {(user.youtubeChannel || user.discordId) && (

@@ -1,6 +1,7 @@
 'use client';
 
 import { BTD6Map, Challenge, GameType, Hero } from '@prisma/client';
+import { useSession } from 'next-auth/react';
 import { useState, useEffect, FormEvent, ChangeEvent } from 'react';
 import React from 'react';
 
@@ -16,9 +17,12 @@ type SubmitFormData = {
   challengeIds: string[];
   mediaLink?: string;
   additionalNotes: string;
+  adminFakeUsername?: string;
 };
 
 export default function SubmissionForm() {
+  const { data: session } = useSession();
+
   const [formData, setFormData] = useState<SubmitFormData>({
     btd6MapId: '',
     gameTypeId: '',
@@ -222,6 +226,8 @@ export default function SubmissionForm() {
       setIsSubmitting(false);
     }
   };
+
+  if (!session) return;
 
   return (
     <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md">
@@ -494,6 +500,23 @@ export default function SubmissionForm() {
             {formData.additionalNotes.length}/500
           </p>
         </div>
+
+        {session.user.admin && (
+          <div className="mb-4">
+          <label htmlFor="seed" className="block text-sm font-medium text-gray-700 mb-1">
+            ADMIN ONLY: Set a username here to submit the run as bot generated from this specified user:
+          </label>
+          <input
+            type="adminFakeUsername"
+            id="adminFakeUsername"
+            name="adminFakeUsername"
+            value={formData.adminFakeUsername || ''}
+            onChange={handleTextChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            disabled={isLoading}
+          />
+          </div>
+        )}
         
         <button
           type="submit"

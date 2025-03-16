@@ -120,6 +120,36 @@ export default async function handler(
       return res.status(400).json({ message: 'Missing required fields' });
     }
 
+    let userId = session.user.id;
+
+    if (fields.adminFakeUsername) {
+      if (!session.user.admin) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+      else {
+        const customUsername = fields.adminFakeUsername[0] as string;
+  
+        let fakeUser = await prisma.user.findFirst({
+          where: {
+            name: customUsername,
+            realUser: false
+          }
+        });
+
+        if (fakeUser === null) {
+          fakeUser = await prisma.user.create({
+            data: {
+              name: customUsername,
+              realUser: false,
+              image: "TechBot.png"
+            }
+          });
+        }
+
+        userId = fakeUser.id;
+      }
+    }
+
     // Process files
     let screenshotPath: string | null = null;
     let processedSavePath: string | null = null;
@@ -167,7 +197,7 @@ export default async function handler(
     // Create submission record
     const submission = await prisma.submission.create({
       data: {
-        userId: session.user.id,
+        userId: userId,
         btd6MapId: btd6MapId,
         gameTypeId: gameTypeId,
         highestRound: highestRound,
@@ -179,12 +209,16 @@ export default async function handler(
         screenshotPath,
         saveFilePath: processedSavePath,
         popcountFilePath: popcountPath,
-        challenges: {
-          connect: (challengeIds).split(',').map((id => ({ id }))),
-        },
-        heroes: {
-          connect: (heroIds).split(',').map((id => ({ id }))),
-        }
+        ...(challengeIds && challengeIds !== '' ? {
+          challenges: {
+            connect: challengeIds.split(',').filter(id => id.trim()).map(id => ({ id })),
+          }
+        } : {}),
+        ...(heroIds && heroIds !== '' ? {
+          heroes: {
+            connect: heroIds.split(',').filter(id => id.trim()).map(id => ({ id })),
+          }
+        } : {}),
       },
     });
 
