@@ -70,6 +70,14 @@ export default function AppBar() {
           {/* Desktop navigation */}
           <div className="hidden md:flex md:items-center md:space-x-4">
             <Link
+              href="/round-data"
+              onClick={(e) => handleNavigation(e, "/round-data")}
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
+            >
+              Round Data
+            </Link>
+
+            <Link
               href="/leaderboard"
               onClick={(e) => handleNavigation(e, "/leaderboard")}
               className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"

@@ -260,9 +260,9 @@ export default function SubmissionForm() {
               disabled={isLoading}
             >
               <option value="">Select Map</option>
-              {maps.map(map => (
-                <option key={map.id} value={map.id}>
-                  {map.name}
+              {maps.map(btd6Map => (
+                <option key={btd6Map.id} value={btd6Map.id}>
+                  {btd6Map.name}
                 </option>
               ))}
             </select>

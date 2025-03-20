@@ -5,8 +5,7 @@ import path from 'path';
 import prisma from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
-import { execFile } from 'child_process';
-import { promisify } from 'util';
+import { ensureDir, processSaveFile } from '@/lib/saveFileManager';
 
 // Tell Next.js not to parse the form automatically
 export const config = {
@@ -15,20 +14,9 @@ export const config = {
   },
 };
 
-const exec = promisify(execFile);
 
 // Configure paths
 export const UPLOAD_DIR = path.join(process.cwd(), 'public/uploads');
-const PYTHON_SCRIPT_PATH = path.join(process.cwd(), 'scripts/saveGenerator/generateMapSave.py');
-
-// Create directories if they don't exist
-export const ensureDir = async (dirPath: string) => {
-  try {
-    await fs.mkdir(dirPath, { recursive: true });
-  } catch (error) {
-    console.error(`Error creating directory ${dirPath}:`, error);
-  }
-};
 
 // Initialize directories
 Promise.all([
@@ -37,32 +25,6 @@ Promise.all([
   ensureDir(path.join(UPLOAD_DIR, 'popcounts')),
   ensureDir(path.join(UPLOAD_DIR, 'temp')),
 ]);
-
-// File processing functions
-const processSaveFile = async (
-  inputPath: string, 
-  mapName: string, 
-  saveFilename: string,
-  popcountFilename: string
-) => {
-  const savePath = path.join(UPLOAD_DIR, 'saves', saveFilename);
-  const popcountPath = path.join(UPLOAD_DIR, 'popcounts', popcountFilename);
-  
-  try {
-    await exec('python', [
-      PYTHON_SCRIPT_PATH,
-      inputPath,
-      mapName,
-      savePath,
-      popcountPath,
-    ]);
-    
-    return { savePath, popcountPath };
-  } finally {
-    // Clean up original upload
-    await fs.unlink(inputPath).catch(() => {});
-  }
-};
 
 export const moveFile = async (file: formidable.File, targetDir: string) => {
   const newPath = path.join(targetDir, path.basename(file.filepath));
@@ -178,19 +140,23 @@ export default async function handler(
         }
       });
 
-      const { savePath: sPath, popcountPath: pPath } = await processSaveFile(
+
+      processedSavePath = path.join(UPLOAD_DIR, 'saves', outputFilename);
+      popcountPath = path.join(UPLOAD_DIR, 'popcounts', popcountFilename);
+      
+      await processSaveFile(
         saveFile.filepath,
         btd6MapData.name.replaceAll(' ', '').replaceAll('\'', ''),
-        outputFilename,
-        popcountFilename,
+        processedSavePath,
+        popcountPath,
       );
       processedSavePath = path.relative(
         path.join(process.cwd(), 'public'),
-        sPath
+        processedSavePath
       );
       popcountPath = path.relative(
         path.join(process.cwd(), 'public'),
-        pPath
+        popcountPath
       );
     }
 

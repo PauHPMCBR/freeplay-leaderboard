@@ -10,6 +10,9 @@
     @apply min-h-screen flex flex-col;
     font-family: 'Roboto', sans-serif;
     background: linear-gradient(135deg, #f0f4f8, #d9e2ec);
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center center;
   }
   select, textarea {
     @apply w-full px-3 py-2 border border-gray-300 rounded-md text-base transition-all;
@@ -131,30 +134,5 @@
 }
 
 .animate-fade-in {
-  animation: fadeIn 1s ease-in-out;
-}
-
-ul {
-  list-style-type: none;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  background-color: #333;
-}
-
-li {
-  float: left;
-}
-
-li a {
-  display: block;
-  color: white;
-  text-align: center;
-  padding: 14px 16px;
-  text-decoration: none;
-}
-
-/* Change the link color to #111 (black) on hover */
-li a:hover {
-  background-color: #111;
+  animation: fadeIn 0.3s ease-in-out;
 }
